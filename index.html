@@ -1,2 +1,579 @@
 
-<!DOCTYPE html> <html lang="es"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> <title>AAlquileres — Gestión Inmobiliaria</title> <script src="https://cdn.tailwindcss.com"></script> <link rel="preconnect" href="https://fonts.googleapis.com"> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"> <style> * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; } body { font-family: 'Plus Jakarta Sans', sans-serif; } .seccion-app { display: none !important; } .seccion-app.visible { display: block !important; } </style> </head> <body class="min-h-screen bg-slate-50 text-slate-800 antialiased pb-24 md:pb-8 flex flex-col"> <!-- AVISO TOAST FLOTANTE --> <div id="toast" style="display: none;" class="fixed top-4 right-4 left-4 sm:left-auto sm:w-80 z-50 bg-slate-900 text-white p-4 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3"> <span class="text-2xl" id="toastIcon">✅</span> <div> <p class="text-xs font-bold" id="toastTitle">¡Acción Exitosa!</p> <p class="text-[11px] text-slate-300" id="toastMsg">Operación realizada con éxito.</p> </div> </div> <!-- CABECERA PRINCIPAL --> <header class="sticky top-0 z-40 bg-white border-b border-slate-200 px-4 py-3 shadow-xs"> <div class="max-w-5xl mx-auto flex items-center justify-between"> <div class="flex items-center gap-3"> <button type="button" onclick="navegar('panel')" class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-extrabold text-lg"> A </button> <div> <div class="flex items-center gap-2"> <button type="button" onclick="navegar('panel')" class="text-base font-extrabold text-slate-900">AAlquileres</button> <span class="text-[10px] text-emerald-800 bg-emerald-100 font-bold px-2 py-0.5 rounded-full">Octubre 2026</span> </div> <p class="text-[11px] text-slate-500 font-medium hidden sm:block">Gestión Inmobiliaria Integral</p> </div> </div> <!-- BOTONES ESCRITORIO --> <nav class="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold"> <button type="button" onclick="navegar('panel')" class="px-3 py-2 rounded-lg bg-white text-slate-900 shadow-xs">📊 Panel</button> <button type="button" onclick="navegar('nueva')" class="px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900">➕ Nueva Propiedad</button> <button type="button" onclick="navegar('inquilinos')" class="px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900">👥 Inquilinos</button> </nav> <button type="button" onclick="navegar('portal')" class="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 flex items-center gap-1"> <span>📱</span> <span>Portal Inquilino</span> </button> </div> </header> <!-- CONTENEDOR CENTRAL DE PANTALLAS --> <main class="max-w-5xl mx-auto w-full px-4 py-6 flex-1"> <!-- ============================================== --> <!-- 1. PANTALLA: PANEL PRINCIPAL --> <!-- ============================================== --> <section id="pantalla-panel" class="seccion-app visible space-y-6"> <!-- TARJETAS DE TOTALES --> <div class="grid grid-cols-1 md:grid-cols-3 gap-4"> <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs"> <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Recaudación Total</span> <p class="text-3xl font-extrabold text-slate-900 mt-2" id="kpiTotal">$1.815.000 <span class="text-sm font-semibold text-slate-400">ARS</span></p> <p class="text-xs text-slate-500 mt-1" id="kpiCount">3 Departamentos</p> </div> <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs border-l-4 border-l-emerald-500"> <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider">✓ Cobrado</span> <p class="text-3xl font-extrabold text-emerald-700 mt-2" id="kpiCobrado">$1.190.000 <span class="text-sm font-semibold text-emerald-500">ARS</span></p> <p class="text-xs text-slate-500 mt-1" id="kpiCobradoCount">2 liquidadas</p> </div> <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs border-l-4 border-l-amber-500"> <span class="text-xs font-bold text-amber-800 uppercase tracking-wider">⏱ Pendiente</span> <p class="text-3xl font-extrabold text-amber-700 mt-2" id="kpiPendiente">$625.000 <span class="text-sm font-semibold text-amber-500">ARS</span></p> <p class="text-xs text-slate-500 mt-1" id="kpiPendienteCount">1 por conciliar</p> </div> </div> <!-- ACCIONES RÁPIDAS --> <div class="grid grid-cols-2 gap-3"> <button type="button" onclick="navegar('nueva')" class="p-4 bg-slate-900 text-white text-xs font-extrabold rounded-xl shadow-sm flex items-center justify-center gap-2 hover:bg-slate-800 active:scale-95 transition"> <span class="text-emerald-400 text-base font-black">+</span> Nueva Propiedad </button> <button type="button" onclick="restablecerEjemplo()" class="p-4 bg-white border border-slate-300 text-slate-700 text-xs font-extrabold rounded-xl hover:bg-slate-50 active:scale-95 transition flex items-center justify-center gap-2"> 🔄 Restaurar Ejemplo </button> </div> <!-- LISTADO DE PROPIEDADES --> <div class="space-y-4"> <div class="flex items-center justify-between"> <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tus Departamentos</h2> <button type="button" onclick="navegar('nueva')" class="text-xs font-bold text-emerald-700 hover:text-emerald-800">+ Agregar Unidad</button> </div> <div id="contenedorPropiedades" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div> </div> </section> <!-- ============================================== --> <!-- 2. PANTALLA: ALTA DE PROPIEDAD --> <!-- ============================================== --> <section id="pantalla-nueva" class="seccion-app max-w-2xl mx-auto space-y-6"> <div class="flex items-center justify-between pb-3 border-b border-slate-200"> <button type="button" onclick="navegar('panel')" class="p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs flex items-center gap-1"> ← Volver al Panel </button> <h2 class="text-base font-extrabold text-slate-900">Alta de Nueva Propiedad</h2> </div> <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4"> <div> <label class="block text-xs font-bold text-slate-700 mb-1">Dirección, Piso y Depto *</label> <input type="text" id="nuevaDir" placeholder="Ej: Thames 2180 7° C" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none"> </div> <div> <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Completo del Inquilino *</label> <input type="text" id="nuevoInquilino" placeholder="Ej: Gonzalo Martínez" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none"> </div> <div class="grid grid-cols-2 gap-3"> <div> <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp Móvil *</label> <input type="text" id="nuevoTel" placeholder="+54 9 11 5566-7788" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none"> </div> <div> <label class="block text-xs font-bold text-slate-700 mb-1">DNI / CUIT</label> <input type="text" id="nuevoDni" placeholder="20-33445566-9" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none"> </div> </div> <div class="grid grid-cols-2 gap-3"> <div> <label class="block text-xs font-bold text-slate-700 mb-1">Canon Inicial ($ ARS) *</label> <input type="number" id="nuevoCanon" placeholder="580000" class="w-full bg-emerald-50 border-2 border-emerald-300 rounded-xl p-3 font-black text-emerald-900 text-lg outline-none"> </div> <div> <label class="block text-xs font-bold text-slate-700 mb-1">Frecuencia de Ajuste</label> <select id="nuevoAjuste" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none"> <option value="ICL Trimestral">ICL Trimestral</option> <option value="ICL Cuatrimestral">ICL Cuatrimestral</option> <option value="IPC Mensual">IPC Mensual</option> <option value="Fijo Acordado">Fijo Acordado</option> </select> </div> </div> <div> <label class="block text-xs font-bold text-slate-700 mb-1">Alias Bancario para Depósito</label> <input type="text" id="nuevoAlias" value="AALQUILERES.COBROS" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm uppercase outline-none"> </div> <button type="button" onclick="guardarNuevaPropiedad()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-sm rounded-xl shadow-lg transition"> ➕ Confirmar y Guardar Propiedad </button> </div> </section> <!-- ============================================== --> <!-- 3. PANTALLA: FICHA Y EDICIÓN --> <!-- ============================================== --> <section id="pantalla-ficha" class="seccion-app max-w-2xl mx-auto space-y-6"> <div class="flex items-center justify-between pb-3 border-b border-slate-200"> <button type="button" onclick="navegar('panel')" class="p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs flex items-center gap-1"> ← Volver al Panel </button> <h2 class="text-base font-extrabold text-slate-900" id="fichaTitulo">Ficha de Departamento</h2> </div> <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4"> <div> <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Completo del Inquilino</label> <input type="text" id="editInquilino" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none"> </div> <div class="grid grid-cols-2 gap-3"> <div> <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp Móvil</label> <input type="text" id="editTel" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none"> </div> <div> <label class="block text-xs font-bold text-slate-700 mb-1">DNI / CUIT</label> <input type="text" id="editDni" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none"> </div> </div> <div class="grid grid-cols-2 gap-3"> <div> <label class="block text-xs font-bold text-slate-700 mb-1">Canon Base ($ ARS)</label> <input type="number" id="editCanon" class="w-full bg-emerald-50 border-2 border-emerald-400 rounded-xl p-3 font-black text-emerald-900 text-lg outline-none"> </div> <div> <label class="block text-xs font-bold text-slate-700 mb-1">Frecuencia de Ajuste</label> <select id="editAjuste" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none"> <option value="ICL Trimestral">ICL Trimestral</option> <option value="ICL Cuatrimestral">ICL Cuatrimestral</option> <option value="IPC Mensual">IPC Mensual</option> <option value="Fijo Acordado">Fijo Acordado</option> </select> </div> </div> <div> <label class="block text-xs font-bold text-slate-700 mb-1">Alias Bancario</label> <input type="text" id="editAlias" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm uppercase outline-none"> </div> <button type="button" onclick="guardarFichaEditada()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-sm rounded-xl shadow-lg transition"> 💾 Guardar Cambios Permanentemente </button> <a id="btnEnviarWhatsAppFicha" href="#" target="_blank" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl text-center block transition"> 📲 Enviar Datos por WhatsApp </a> </div> </section> <!-- ============================================== --> <!-- 4. PANTALLA: GESTIÓN DE INQUILINOS --> <!-- ============================================== --> <section id="pantalla-inquilinos" class="seccion-app space-y-6"> <div class="flex items-center justify-between pb-3 border-b border-slate-200"> <div> <h2 class="text-base font-extrabold text-slate-900">Gestión de Inquilinos</h2> <p class="text-xs text-slate-500">Accesos directos por WhatsApp</p> </div> <button type="button" onclick="navegar('panel')" class="p-2.5 rounded-xl bg-slate-200 text-slate-800 font-bold text-xs"> ← Volver </button> </div> <div id="contenedorInquilinos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div> </section> <!-- ============================================== --> <!-- 5. PANTALLA: PORTAL DEL INQUILINO --> <!-- ============================================== --> <section id="pantalla-portal" class="seccion-app max-w-xl mx-auto space-y-5"> <div class="flex items-center justify-between pb-3 border-b border-slate-200"> <button type="button" onclick="navegar('panel')" class="p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs"> ← Volver al Panel </button> <span class="text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">Octubre 2026</span> </div> <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-5 rounded-2xl shadow-sm"> <span class="text-[10px] text-emerald-400 font-bold uppercase block">Alquiler Activo</span> <h2 class="text-xl font-black mt-1" id="portalDir">Julián Álvarez 1845 2° A</h2> <p class="text-xs text-slate-300 mt-0.5">Locataria: <strong class="text-white" id="portalInquilino">Lucía Fernández</strong></p> </div> <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm"> <div class="flex justify-between items-center text-xs"> <span class="font-bold text-slate-500 uppercase">Total a transferir</span> <span class="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg">Vence el 10</span> </div> <div class="space-y-2 text-xs text-slate-600 border-b border-slate-100 pb-3"> <div class="flex justify-between"><span>Canon Alquiler base</span> <strong id="portalCanon" class="text-slate-900 font-bold">$540.000 ARS</strong></div> <div class="flex justify-between"><span>Expensas ordinarias</span> <strong class="text-slate-900 font-bold">$68.500 ARS</strong></div> <div class="flex justify-between"><span>Servicios (Edenor + AySA)</span> <strong class="text-slate-900 font-bold">$18.200 ARS</strong></div> <div class="flex justify-between text-emerald-700 font-bold" id="filaDeduccion" style="display: none;"> <span>(-) Deducción extraordinaria</span> <span id="montoDeduccion">-$0 ARS</span> </div> </div> <div class="flex justify-between items-baseline pt-1"> <span class="text-xs font-bold text-slate-900">Total este mes:</span> <span class="text-2xl font-black text-slate-900" id="portalTotal">$626.700 <span class="text-xs font-normal text-slate-500">ARS</span></span> </div> </div> <!-- ALIAS BANCARIO --> <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-sm"> <span class="text-[10px] text-slate-400 font-bold uppercase block">Datos para transferencia bancaria</span> <div class="bg-slate-50 p-3.5 rounded-xl flex justify-between items-center"> <div> <p class="text-sm font-black text-slate-900" id="portalAlias">AALQUILERES.JULIAN1845</p> <p class="text-[10px] text-slate-500">Banco Galicia · Titular Verificado</p> </div> <button type="button" onclick="copiarAliasBancario()" class="px-3.5 py-1.5 bg-white border border-slate-300 font-bold text-xs rounded-lg hover:bg-slate-100 active:scale-95"> Copiar </button> </div> </div> <!-- CASILLERO EXTRAORDINARIAS --> <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 text-xs space-y-2"> <h3 class="font-bold text-amber-950">¿Pagaste conceptos extraordinarios?</h3> <p class="text-slate-600 text-[11px]">Ingresá el importe para descontarlo del próximo mes:</p> <div class="flex gap-2"> <input type="number" id="inputDeduccion" placeholder="Monto ($ ARS)" class="flex-1 bg-white border border-amber-300 rounded-xl p-2.5 text-xs font-bold outline-none"> <button type="button" onclick="guardarDeduccion()" class="px-4 py-2.5 bg-amber-700 hover:bg-amber-800 text-white font-bold rounded-xl active:scale-95"> Guardar </button> </div> </div> <a id="btnAvisarPagoWA" href="#" target="_blank" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md block text-center active:scale-95"> 📲 Avisar Pago por WhatsApp </a> </section> </main> <!-- NAVEGACIÓN MÓVIL FIJA INFERIOR --> <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-2 flex justify-around text-xs font-bold text-slate-500 z-50 shadow-lg"> <button type="button" onclick="navegar('panel')" id="mob-panel" class="flex flex-col items-center gap-1 text-slate-900 font-extrabold"> <span class="text-lg">📊</span><span>Panel</span> </button> <button type="button" onclick="navegar('nueva')" id="mob-nueva" class="flex flex-col items-center gap-1 hover:text-slate-900"> <span class="text-lg">➕</span><span>+ Propiedad</span> </button> <button type="button" onclick="navegar('inquilinos')" id="mob-inquilinos" class="flex flex-col items-center gap-1 hover:text-slate-900"> <span class="text-lg">👥</span><span>Inquilinos</span> </button> <button type="button" onclick="navegar('portal')" id="mob-portal" class="flex flex-col items-center gap-1 hover:text-slate-900"> <span class="text-lg">📱</span><span>Portal</span> </button> </nav> <!-- MOTOR JAVASCRIPT SIN COMPLICACIONES --> <script> var CLAVE_STORAGE = 'AALQUILERES_DEFINITIVO_V1'; var PROPIEDADES_BASE = [ { id: '1', dir: 'Julián Álvarez 1845 2° A', inq: 'Lucía Fernández', tel: '+54 9 11 5824-9912', dni: '27-38491204-4', canon: 540000, ajuste: 'ICL Trimestral', cobrado: true, alias: 'AALQUILERES.JULIAN1845' }, { id: '2', dir: 'Av. Santa Fe 3420 4° B', inq: 'Martín Repetto', tel: '+54 9 11 4192-3301', dni: '20-35128994-3', canon: 650000, ajuste: 'IPC Cuatrimestral', cobrado: true, alias: 'AALQUILERES.SANTAFE' }, { id: '3', dir: 'Gorriti 4810 5° B', inq: 'Florencia D\'Agostino', tel: '+54 9 11 6023-8874', dni: '27-39201948-2', canon: 625000, ajuste: 'ICL Trimestral', cobrado: false, alias: 'AALQUILERES.GORRITI' } ]; var idSeleccionado = '1'; // 1. NAVEGACIÓN TOTALMENTE INFALIBLE function navegar(nombre) { var secciones = document.querySelectorAll('.seccion-app'); for (var i = 0; i < secciones.length; i++) { secciones[i].classList.remove('visible'); } var objetivo = document.getElementById('pantalla-' + nombre); if (objetivo) { objetivo.classList.add('visible'); window.scrollTo(0, 0); } // Estilo de botones móviles ['panel', 'nueva', 'inquilinos', 'portal'].forEach(function(item) { var boton = document.getElementById('mob-' + item); if (boton) { if (item === nombre) { boton.className = 'flex flex-col items-center gap-1 text-slate-900 font-extrabold'; } else { boton.className = 'flex flex-col items-center gap-1 text-slate-500 font-bold hover:text-slate-900'; } } }); } // 2. GESTIÓN DE DATOS LOCALES function obtenerDatos() { var guardados = localStorage.getItem(CLAVE_STORAGE); if (guardados) { try { var arr = JSON.parse(guardados); if (Array.isArray(arr) && arr.length > 0) return arr; } catch(e){} } localStorage.setItem(CLAVE_STORAGE, JSON.stringify(PROPIEDADES_BASE)); return PROPIEDADES_BASE; } function guardarDatos(datos) { localStorage.setItem(CLAVE_STORAGE, JSON.stringify(datos)); } function restablecerEjemplo() { guardarDatos(PROPIEDADES_BASE); idSeleccionado = '1'; actualizarInterfaz(); mostrarMensaje('¡Datos restablecidos con éxito!'); } function mostrarMensaje(texto) { var t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = texto; t.style.display = 'flex'; setTimeout(function() { t.style.display = 'none'; }, 2500); } // 3. CAMBIAR ESTADO DE PAGO (COBRADO / PENDIENTE) function togglePago(id) { var lista = obtenerDatos(); var p = lista.find(function(x) { return x.id === id; }); if (p) { p.cobrado = !p.cobrado; guardarDatos(lista); actualizarInterfaz(); mostrarMensaje(p.cobrado ? 'Marcado como COBRADO' : 'Marcado como PENDIENTE'); } } // 4. ABRIR FICHA PARA EDITAR function verFicha(id) { idSeleccionado = id; var lista = obtenerDatos(); var p = lista.find(function(x) { return x.id === id; }) || lista[0]; if (!p) return; document.getElementById('fichaTitulo').innerText = p.dir; document.getElementById('editInquilino').value = p.inq; document.getElementById('editTel').value = p.tel; document.getElementById('editDni').value = p.dni; document.getElementById('editCanon').value = p.canon; document.getElementById('editAjuste').value = p.ajuste; document.getElementById('editAlias').value = p.alias; var cleanPh = (p.tel || '').replace(/[^0-9]/g, ''); document.getElementById('btnEnviarWhatsAppFicha').href = 'https://wa.me/' + cleanPh + '?text=' + encodeURIComponent('¡Hola ' + p.inq + '! Te recordamos el alquiler en ' + p.dir + '. Canon: $' + Number(p.canon).toLocaleString('es-AR') + ' ARS. Alias: ' + p.alias); navegar('ficha'); } // 5. GUARDAR CAMBIOS EN LA FICHA function guardarFichaEditada() { var lista = obtenerDatos(); var p = lista.find(function(x) { return x.id === idSeleccionado; }); if (!p) return; p.inq = document.getElementById('editInquilino').value.trim(); p.tel = document.getElementById('editTel').value.trim(); p.dni = document.getElementById('editDni').value.trim(); p.canon = Number(document.getElementById('editCanon').value.trim()) || p.canon; p.ajuste = document.getElementById('editAjuste').value; p.alias = document.getElementById('editAlias').value.trim().toUpperCase() || p.alias; guardarDatos(lista); actualizarInterfaz(); mostrarMensaje('¡Ficha actualizada permanentemente!'); navegar('panel'); } // 6. CREAR NUEVA PROPIEDAD function guardarNuevaPropiedad() { var dir = document.getElementById('nuevaDir').value.trim(); var inq = document.getElementById('nuevoInquilino').value.trim(); var canon = document.getElementById('nuevoCanon').value.trim(); if (!dir || !inq || !canon) { alert('Por favor completá Dirección, Inquilino y Canon.'); return; } var lista = obtenerDatos(); var nueva = { id: String(new Date().getTime()), dir: dir, inq: inq, tel: document.getElementById('nuevoTel').value.trim() || '+54 9 11 0000-0000', dni: document.getElementById('nuevoDni').value.trim() || 'Sin DNI', canon: Number(canon), ajuste: document.getElementById('nuevoAjuste').value, cobrado: false, alias: document.getElementById('nuevoAlias').value.trim().toUpperCase() || 'AALQUILERES.COBROS' }; lista.unshift(nueva); guardarDatos(lista); idSeleccionado = nueva.id; actualizarInterfaz(); mostrarMensaje('¡Propiedad guardada con éxito!'); navegar('panel'); } // 7. COPIAR ALIAS Y DEDUCCIÓN function copiarAliasBancario() { var lista = obtenerDatos(); var p = lista.find(function(x) { return x.id === idSeleccionado; }) || lista[0]; var alias = p ? p.alias : 'AALQUILERES.JULIAN1845'; if (navigator.clipboard) navigator.clipboard.writeText(alias); mostrarMensaje('¡Alias copiado al portapapeles!'); } function guardarDeduccion() { var val = Number(document.getElementById('inputDeduccion').value); if (!val || val <= 0) { alert('Ingresá un monto válido'); return; } document.getElementById('filaDeduccion').style.display = 'flex'; document.getElementById('montoDeduccion').innerText = '-$' + val.toLocaleString('es-AR') + ' ARS'; var lista = obtenerDatos(); var p = lista.find(function(x) { return x.id === idSeleccionado; }) || lista[0]; var total = (Number(p.canon) + 68500 + 18200) - val; document.getElementById('portalTotal').innerHTML = '$' + total.toLocaleString('es-AR') + ' <span class="text-xs font-normal text-slate-500">ARS</span>'; mostrarMensaje('Deducción guardada para el mes próximo'); } // 8. RENDERIZADO GENERAL DE LA APLICACIÓN function actualizarInterfaz() { var lista = obtenerDatos(); var total = 0, cobrado = 0, cobradasCount = 0; lista.forEach(function(p) { var c = Number(p.canon) || 0; total += c; if (p.cobrado) { cobrado += c; cobradasCount++; } }); var pendiente = total - cobrado; var pendientesCount = lista.length - cobradasCount; document.getElementById('kpiTotal').innerHTML = '$' + total.toLocaleString('es-AR') + ' <span class="text-sm font-semibold text-slate-400">ARS</span>'; document.getElementById('kpiCount').innerText = lista.length + ' Departamentos'; document.getElementById('kpiCobrado').innerHTML = '$' + cobrado.toLocaleString('es-AR') + ' <span class="text-sm font-semibold text-emerald-500">ARS</span>'; document.getElementById('kpiCobradoCount').innerText = cobradasCount + ' liquidadas'; document.getElementById('kpiPendiente').innerHTML = '$' + pendiente.toLocaleString('es-AR') + ' <span class="text-sm font-semibold text-amber-500">ARS</span>'; document.getElementById('kpiPendienteCount').innerText = pendientesCount + ' por conciliar'; // Tarjetas de Departamentos var contenedor = document.getElementById('contenedorPropiedades'); contenedor.innerHTML = ''; lista.forEach(function(p) { var tarjeta = document.createElement('div'); tarjeta.className = 'bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4'; tarjeta.innerHTML = '<div class="flex justify-between items-start">' + '<div>' + '<h3 class="text-sm font-extrabold text-slate-900">' + p.dir + '</h3>' + '<p class="text-xs text-slate-500 mt-0.5">Inquilino/a: <strong class="text-slate-900 font-bold">' + p.inq + '</strong></p>' + '</div>' + (p.cobrado ? '<span class="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">✓ Cobrado</span>' : '<span class="text-[10px] font-bold bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200">⏱ Pendiente</span>') + '</div>' + '<div class="bg-slate-50 p-3 rounded-xl flex justify-between items-center text-xs">' + '<div><span class="text-[10px] text-slate-400 block font-semibold">Canon</span><strong class="text-slate-900 font-black">$' + Number(p.canon).toLocaleString('es-AR') + '</strong></div>' + '<div><span class="text-[10px] text-slate-400 block font-semibold">Ajuste</span><span class="text-slate-700 font-bold">' + p.ajuste + '</span></div>' + '</div>' + '<div class="flex gap-2 pt-1">' + '<button type="button" onclick="verFicha(\'' + p.id + '\')" class="flex-1 py-2.5 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 active:scale-95 transition">Ver Ficha</button>' + '<button type="button" onclick="togglePago(\'' + p.id + '\')" class="px-3.5 py-2.5 ' + (p.cobrado ? 'bg-slate-100 text-slate-700 border border-slate-200' : 'bg-emerald-600 text-white') + ' text-xs font-bold rounded-xl active:scale-95 transition">' + (p.cobrado ? '✓ Al día' : 'Cobrar') + '</button>' + '</div>'; contenedor.appendChild(tarjeta); }); // Tarjetas en Inquilinos var contInq = document.getElementById('contenedorInquilinos'); contInq.innerHTML = ''; lista.forEach(function(p) { var cleanPh = (p.tel || '').replace(/[^0-9]/g, ''); var waUrl = 'https://wa.me/' + cleanPh + '?text=' + encodeURIComponent('¡Hola ' + p.inq + '! Te recordamos el canon en ' + p.dir + ' por $' + Number(p.canon).toLocaleString('es-AR') + ' ARS.'); var icard = document.createElement('div'); icard.className = 'bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3 text-xs'; icard.innerHTML = '<div class="flex justify-between items-start">' + '<div><h3 class="text-sm font-extrabold text-slate-900">' + p.inq + '</h3><p class="text-xs text-slate-500">' + p.dir + '</p></div>' + '<span class="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">Activo</span>' + '</div>' + '<p class="text-slate-600">📱 WhatsApp: <strong class="text-slate-900">' + p.tel + '</strong></p>' + '<div class="grid grid-cols-2 gap-2 pt-1">' + '<a href="' + waUrl + '" target="_blank" class="py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-center block">WhatsApp</a>' + '<button type="button" onclick="verFicha(\'' + p.id + '\')" class="py-2.5 bg-slate-900 text-white font-bold rounded-xl">Editar Ficha</button>' + '</div>'; contInq.appendChild(icard); }); // Portal del Inquilino var cur = lista.find(function(x) { return x.id === idSeleccionado; }) || lista[0]; if (cur) { document.getElementById('portalDir').innerText = cur.dir; document.getElementById('portalInquilino').innerText = cur.inq; document.getElementById('portalCanon').innerText = '$' + Number(cur.canon).toLocaleString('es-AR') + ' ARS'; document.getElementById('portalAlias').innerText = cur.alias; var totalConServicios = Number(cur.canon) + 68500 + 18200; document.getElementById('portalTotal').innerHTML = '$' + totalConServicios.toLocaleString('es-AR') + ' <span class="text-xs font-normal text-slate-500">ARS</span>'; var cleanPh2 = (cur.tel || '').replace(/[^0-9]/g, ''); document.getElementById('btnAvisarPagoWA').href = 'https://wa.me/' + cleanPh2 + '?text=' + encodeURIComponent('¡Hola! Ya realicé la transferencia de mi alquiler en ' + cur.dir + ' por $' + totalConServicios.toLocaleString('es-AR') + ' ARS.'); } } // ARRANQUE INICIAL actualizarInterfaz(); navegar('panel'); </script> </body> </html> ```
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AAlquileres — Gestión Inmobiliaria</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .vista-pantalla { display: none !important; }
+    .vista-pantalla.activa { display: block !important; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800 antialiased pb-24 md:pb-8 flex flex-col">
+
+  <!-- AVISO TOAST FLOTANTE -->
+  <div id="toast" style="display: none;" class="fixed top-4 right-4 left-4 sm:left-auto sm:w-80 z-50 bg-slate-900 text-white p-4 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3">
+    <span class="text-2xl" id="toastIcon">✅</span>
+    <div>
+      <p class="text-xs font-bold" id="toastTitle">¡Acción Exitosa!</p>
+      <p class="text-[11px] text-slate-300" id="toastMsg">Operación realizada con éxito.</p>
+    </div>
+  </div>
+
+  <!-- CABECERA PRINCIPAL -->
+  <header class="sticky top-0 z-40 bg-white border-b border-slate-200 px-4 py-3 shadow-xs">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button type="button" onclick="irA('panel')" class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-extrabold text-lg">
+          A
+        </button>
+        <div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="irA('panel')" class="text-base font-extrabold text-slate-900">AAlquileres</button>
+            <span class="text-[10px] text-emerald-800 bg-emerald-100 font-bold px-2 py-0.5 rounded-full">Octubre 2026</span>
+          </div>
+          <p class="text-[11px] text-slate-500 font-medium hidden sm:block">Gestión Inmobiliaria Integral</p>
+        </div>
+      </div>
+
+      <!-- BOTONES ESCRITORIO -->
+      <nav class="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold">
+        <button type="button" onclick="irA('panel')" class="px-3 py-2 rounded-lg bg-white text-slate-900 shadow-xs">📊 Panel</button>
+        <button type="button" onclick="irA('nueva')" class="px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900">➕ Nueva Propiedad</button>
+        <button type="button" onclick="irA('inquilinos')" class="px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900">👥 Inquilinos</button>
+      </nav>
+
+      <button type="button" onclick="irA('portal')" class="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 flex items-center gap-1">
+        <span>📱</span> <span>Portal Inquilino</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR CENTRAL DE PANTALLAS -->
+  <main class="max-w-5xl mx-auto w-full px-4 py-6 flex-1">
+
+    <!-- ============================================== -->
+    <!-- 1. PANTALLA: PANEL PRINCIPAL                    -->
+    <!-- ============================================== -->
+    <section id="vista-panel" class="vista-pantalla activa space-y-6">
+      <!-- TARJETAS DE TOTALES -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Recaudación Total</span>
+          <p class="text-3xl font-extrabold text-slate-900 mt-2" id="kpiTotal">$1.815.000 <span class="text-sm font-semibold text-slate-400">ARS</span></p>
+          <p class="text-xs text-slate-500 mt-1" id="kpiCount">3 Departamentos</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs border-l-4 border-l-emerald-500">
+          <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider">✓ Cobrado</span>
+          <p class="text-3xl font-extrabold text-emerald-700 mt-2" id="kpiCobrado">$1.190.000 <span class="text-sm font-semibold text-emerald-500">ARS</span></p>
+          <p class="text-xs text-slate-500 mt-1" id="kpiCobradoCount">2 liquidadas</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs border-l-4 border-l-amber-500">
+          <span class="text-xs font-bold text-amber-800 uppercase tracking-wider">⏱ Pendiente</span>
+          <p class="text-3xl font-extrabold text-amber-700 mt-2" id="kpiPendiente">$625.000 <span class="text-sm font-semibold text-amber-500">ARS</span></p>
+          <p class="text-xs text-slate-500 mt-1" id="kpiPendienteCount">1 por conciliar</p>
+        </div>
+      </div>
+
+      <!-- ACCIONES RÁPIDAS -->
+      <div class="grid grid-cols-2 gap-3">
+        <button type="button" onclick="irA('nueva')" class="p-4 bg-slate-900 text-white text-xs font-extrabold rounded-xl shadow-sm flex items-center justify-center gap-2 hover:bg-slate-800 active:scale-95 transition">
+          <span class="text-emerald-400 text-base font-black">+</span> Nueva Propiedad
+        </button>
+        <button type="button" onclick="restablecerEjemplo()" class="p-4 bg-white border border-slate-300 text-slate-700 text-xs font-extrabold rounded-xl hover:bg-slate-50 active:scale-95 transition flex items-center justify-center gap-2">
+          🔄 Restaurar Ejemplo
+        </button>
+      </div>
+
+      <!-- LISTADO DE PROPIEDADES -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tus Departamentos</h2>
+          <button type="button" onclick="irA('nueva')" class="text-xs font-bold text-emerald-700 hover:text-emerald-800">+ Agregar Unidad</button>
+        </div>
+        <div id="contenedorPropiedades" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 2. PANTALLA: ALTA DE PROPIEDAD                 -->
+    <!-- ============================================== -->
+    <section id="vista-nueva" class="vista-pantalla max-w-2xl mx-auto space-y-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <button type="button" onclick="irA('panel')" class="p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs flex items-center gap-1">
+          ← Volver al Panel
+        </button>
+        <h2 class="text-base font-extrabold text-slate-900">Alta de Nueva Propiedad</h2>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Dirección, Piso y Depto *</label>
+          <input type="text" id="nuevaDir" placeholder="Ej: Thames 2180 7° C" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Completo del Inquilino *</label>
+          <input type="text" id="nuevoInquilino" placeholder="Ej: Gonzalo Martínez" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp Móvil *</label>
+            <input type="text" id="nuevoTel" placeholder="+54 9 11 5566-7788" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">DNI / CUIT</label>
+            <input type="text" id="nuevoDni" placeholder="20-33445566-9" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Canon Inicial ($ ARS) *</label>
+            <input type="number" id="nuevoCanon" placeholder="580000" class="w-full bg-emerald-50 border-2 border-emerald-300 rounded-xl p-3 font-black text-emerald-900 text-lg outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Frecuencia de Ajuste</label>
+            <select id="nuevoAjuste" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none">
+              <option value="ICL Trimestral">ICL Trimestral</option>
+              <option value="ICL Cuatrimestral">ICL Cuatrimestral</option>
+              <option value="IPC Mensual">IPC Mensual</option>
+              <option value="Fijo Acordado">Fijo Acordado</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Alias Bancario para Depósito</label>
+          <input type="text" id="nuevoAlias" value="AALQUILERES.COBROS" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm uppercase outline-none">
+        </div>
+
+        <button type="button" onclick="guardarNuevaPropiedad()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-sm rounded-xl shadow-lg transition">
+          ➕ Confirmar y Guardar Propiedad
+        </button>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 3. PANTALLA: FICHA Y EDICIÓN                    -->
+    <!-- ============================================== -->
+    <section id="vista-ficha" class="vista-pantalla max-w-2xl mx-auto space-y-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <button type="button" onclick="irA('panel')" class="p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs flex items-center gap-1">
+          ← Volver al Panel
+        </button>
+        <h2 class="text-base font-extrabold text-slate-900" id="fichaTitulo">Ficha de Departamento</h2>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Completo del Inquilino</label>
+          <input type="text" id="editInquilino" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp Móvil</label>
+            <input type="text" id="editTel" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">DNI / CUIT</label>
+            <input type="text" id="editDni" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Canon Base ($ ARS)</label>
+            <input type="number" id="editCanon" class="w-full bg-emerald-50 border-2 border-emerald-400 rounded-xl p-3 font-black text-emerald-900 text-lg outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Frecuencia de Ajuste</label>
+            <select id="editAjuste" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm outline-none">
+              <option value="ICL Trimestral">ICL Trimestral</option>
+              <option value="ICL Cuatrimestral">ICL Cuatrimestral</option>
+              <option value="IPC Mensual">IPC Mensual</option>
+              <option value="Fijo Acordado">Fijo Acordado</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Alias Bancario</label>
+          <input type="text" id="editAlias" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm uppercase outline-none">
+        </div>
+
+        <button type="button" onclick="guardarFichaEditada()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-sm rounded-xl shadow-lg transition">
+          💾 Guardar Cambios Permanentemente
+        </button>
+
+        <a id="btnEnviarWhatsAppFicha" href="#" target="_blank" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl text-center block transition">
+          📲 Enviar Datos por WhatsApp
+        </a>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 4. PANTALLA: GESTIÓN DE INQUILINOS             -->
+    <!-- ============================================== -->
+    <section id="vista-inquilinos" class="vista-pantalla space-y-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900">Gestión de Inquilinos</h2>
+          <p class="text-xs text-slate-500">Accesos directos por WhatsApp</p>
+        </div>
+        <button type="button" onclick="irA('panel')" class="p-2.5 rounded-xl bg-slate-200 text-slate-800 font-bold text-xs">
+          ← Volver
+        </button>
+      </div>
+      <div id="contenedorInquilinos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 5. PANTALLA: PORTAL DEL INQUILINO              -->
+    <!-- ============================================== -->
+    <section id="vista-portal" class="vista-pantalla max-w-xl mx-auto space-y-5">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <button type="button" onclick="irA('panel')" class="p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs">
+          ← Volver al Panel
+        </button>
+        <span class="text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">Octubre 2026</span>
+      </div>
+
+      <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-5 rounded-2xl shadow-sm">
+        <span class="text-[10px] text-emerald-400 font-bold uppercase block">Alquiler Activo</span>
+        <h2 class="text-xl font-black mt-1" id="portalDir">Julián Álvarez 1845 2° A</h2>
+        <p class="text-xs text-slate-300 mt-0.5">Locataria: <strong class="text-white" id="portalInquilino">Lucía Fernández</strong></p>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-slate-500 uppercase">Total a transferir</span>
+          <span class="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg">Vence el 10</span>
+        </div>
+
+        <div class="space-y-2 text-xs text-slate-600 border-b border-slate-100 pb-3">
+          <div class="flex justify-between"><span>Canon Alquiler base</span> <strong id="portalCanon" class="text-slate-900 font-bold">$540.000 ARS</strong></div>
+          <div class="flex justify-between"><span>Expensas ordinarias</span> <strong class="text-slate-900 font-bold">$68.500 ARS</strong></div>
+          <div class="flex justify-between"><span>Servicios (Edenor + AySA)</span> <strong class="text-slate-900 font-bold">$18.200 ARS</strong></div>
+          <div class="flex justify-between text-emerald-700 font-bold" id="filaDeduccion" style="display: none;">
+            <span>(-) Deducción extraordinaria</span> <span id="montoDeduccion">-$0 ARS</span>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-baseline pt-1">
+          <span class="text-xs font-bold text-slate-900">Total este mes:</span>
+          <span class="text-2xl font-black text-slate-900" id="portalTotal">$626.700 <span class="text-xs font-normal text-slate-500">ARS</span></span>
+        </div>
+      </div>
+
+      <!-- ALIAS BANCARIO -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-sm">
+        <span class="text-[10px] text-slate-400 font-bold uppercase block">Datos para transferencia bancaria</span>
+        <div class="bg-slate-50 p-3.5 rounded-xl flex justify-between items-center">
+          <div>
+            <p class="text-sm font-black text-slate-900" id="portalAlias">AALQUILERES.JULIAN1845</p>
+            <p class="text-[10px] text-slate-500">Banco Galicia · Titular Verificado</p>
+          </div>
+          <button type="button" onclick="copiarAliasBancario()" class="px-3.5 py-1.5 bg-white border border-slate-300 font-bold text-xs rounded-lg hover:bg-slate-100 active:scale-95">
+            Copiar
+          </button>
+        </div>
+      </div>
+
+      <!-- CASILLERO EXTRAORDINARIAS -->
+      <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 text-xs space-y-2">
+        <h3 class="font-bold text-amber-950">¿Pagaste conceptos extraordinarios?</h3>
+        <p class="text-slate-600 text-[11px]">Ingresá el importe para descontarlo del próximo mes:</p>
+        <div class="flex gap-2">
+          <input type="number" id="inputDeduccion" placeholder="Monto ($ ARS)" class="flex-1 bg-white border border-amber-300 rounded-xl p-2.5 text-xs font-bold outline-none">
+          <button type="button" onclick="guardarDeduccion()" class="px-4 py-2.5 bg-amber-700 hover:bg-amber-800 text-white font-bold rounded-xl active:scale-95">
+            Guardar
+          </button>
+        </div>
+      </div>
+
+      <a id="btnAvisarPagoWA" href="#" target="_blank" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md block text-center active:scale-95">
+        📲 Avisar Pago por WhatsApp
+      </a>
+    </section>
+
+  </main>
+
+  <!-- NAVEGACIÓN MÓVIL FIJA INFERIOR -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-2 flex justify-around text-xs font-bold text-slate-500 z-50 shadow-lg">
+    <button type="button" onclick="irA('panel')" id="mob-panel" class="flex flex-col items-center gap-1 text-slate-900 font-extrabold">
+      <span class="text-lg">📊</span><span>Panel</span>
+    </button>
+    <button type="button" onclick="irA('nueva')" id="mob-nueva" class="flex flex-col items-center gap-1 hover:text-slate-900">
+      <span class="text-lg">➕</span><span>+ Propiedad</span>
+    </button>
+    <button type="button" onclick="irA('inquilinos')" id="mob-inquilinos" class="flex flex-col items-center gap-1 hover:text-slate-900">
+      <span class="text-lg">👥</span><span>Inquilinos</span>
+    </button>
+    <button type="button" onclick="irA('portal')" id="mob-portal" class="flex flex-col items-center gap-1 hover:text-slate-900">
+      <span class="text-lg">📱</span><span>Portal</span>
+    </button>
+  </nav>
+
+  <!-- MOTOR JAVASCRIPT GARANTIZADO -->
+  <script>
+    var CLAVE_STORAGE = 'AALQUILERES_VFINAL_OK';
+
+    var PROPIEDADES_DEFAULT = [
+      { id: '1', dir: 'Julián Álvarez 1845 2° A', inq: 'Lucía Fernández', tel: '+54 9 11 5824-9912', dni: '27-38491204-4', canon: 540000, ajuste: 'ICL Trimestral', cobrado: true, alias: 'AALQUILERES.JULIAN1845' },
+      { id: '2', dir: 'Av. Santa Fe 3420 4° B', inq: 'Martín Repetto', tel: '+54 9 11 4192-3301', dni: '20-35128994-3', canon: 650000, ajuste: 'IPC Cuatrimestral', cobrado: true, alias: 'AALQUILERES.SANTAFE' },
+      { id: '3', dir: 'Gorriti 4810 5° B', inq: 'Florencia D\'Agostino', tel: '+54 9 11 6023-8874', dni: '27-39201948-2', canon: 625000, ajuste: 'ICL Trimestral', cobrado: false, alias: 'AALQUILERES.GORRITI' }
+    ];
+
+    var idSeleccionado = '1';
+
+    // NAVEGACIÓN LIMPIA
+    function irA(nombre) {
+      var pantallas = document.querySelectorAll('.vista-pantalla');
+      pantallas.forEach(function(p) { p.classList.remove('activa'); });
+
+      var target = document.getElementById('vista-' + nombre);
+      if (target) {
+        target.classList.add('activa');
+        window.scrollTo(0, 0);
+      }
+
+      ['panel', 'nueva', 'inquilinos', 'portal'].forEach(function(item) {
+        var b = document.getElementById('mob-' + item);
+        if (b) {
+          if (item === nombre) {
+            b.className = 'flex flex-col items-center gap-1 text-slate-900 font-extrabold';
+          } else {
+            b.className = 'flex flex-col items-center gap-1 text-slate-500 font-bold hover:text-slate-900';
+          }
+        }
+      });
+    }
+
+    function mostrarToast(msg) {
+      var t = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      t.style.display = 'flex';
+      setTimeout(function() { t.style.display = 'none'; }, 2500);
+    }
+
+    function obtenerDatos() {
+      var guardados = localStorage.getItem(CLAVE_STORAGE);
+      if (guardados) {
+        try {
+          var arr = JSON.parse(guardados);
+          if (Array.isArray(arr) && arr.length > 0) return arr;
+        } catch(e){}
+      }
+      localStorage.setItem(CLAVE_STORAGE, JSON.stringify(PROPIEDADES_DEFAULT));
+      return PROPIEDADES_DEFAULT;
+    }
+
+    function guardarDatos(datos) {
+      localStorage.setItem(CLAVE_STORAGE, JSON.stringify(datos));
+    }
+
+    function restablecerEjemplo() {
+      guardarDatos(PROPIEDADES_DEFAULT);
+      idSeleccionado = '1';
+      renderizar();
+      mostrarToast('Datos restaurados correctamente');
+    }
+
+    function togglePago(id) {
+      var lista = obtenerDatos();
+      var p = lista.find(function(x) { return x.id === id; });
+      if (p) {
+        p.cobrado = !p.cobrado;
+        guardarDatos(lista);
+        renderizar();
+        mostrarToast(p.cobrado ? 'Marcado como COBRADO' : 'Marcado como PENDIENTE');
+      }
+    }
+
+    function abrirFicha(id) {
+      idSeleccionado = id;
+      var lista = obtenerDatos();
+      var p = lista.find(function(x) { return x.id === id; }) || lista[0];
+      if (!p) return;
+
+      document.getElementById('fichaTitulo').innerText = p.dir;
+      document.getElementById('editInquilino').value = p.inq;
+      document.getElementById('editTel').value = p.tel;
+      document.getElementById('editDni').value = p.dni;
+      document.getElementById('editCanon').value = p.canon;
+      document.getElementById('editAjuste').value = p.ajuste;
+      document.getElementById('editAlias').value = p.alias;
+
+      var cleanPh = (p.tel || '').replace(/[^0-9]/g, '');
+      document.getElementById('btnEnviarWhatsAppFicha').href = 'https://wa.me/' + cleanPh + '?text=' + encodeURIComponent('¡Hola ' + p.inq + '! Te recordamos el canon en ' + p.dir + '. Canon: $' + Number(p.canon).toLocaleString('es-AR') + ' ARS. Alias: ' + p.alias);
+
+      irA('ficha');
+    }
+
+    function guardarFichaEditada() {
+      var lista = obtenerDatos();
+      var p = lista.find(function(x) { return x.id === idSeleccionado; });
+      if (!p) return;
+
+      p.inq = document.getElementById('editInquilino').value.trim();
+      p.tel = document.getElementById('editTel').value.trim();
+      p.dni = document.getElementById('editDni').value.trim();
+      p.canon = Number(document.getElementById('editCanon').value.trim()) || p.canon;
+      p.ajuste = document.getElementById('editAjuste').value;
+      p.alias = document.getElementById('editAlias').value.trim().toUpperCase() || p.alias;
+
+      guardarDatos(lista);
+      renderizar();
+      mostrarToast('Ficha actualizada');
+      irA('panel');
+    }
+
+    function guardarNuevaPropiedad() {
+      var dir = document.getElementById('nuevaDir').value.trim();
+      var inq = document.getElementById('nuevoInquilino').value.trim();
+      var canon = document.getElementById('nuevoCanon').value.trim();
+
+      if (!dir || !inq || !canon) {
+        alert('Por favor completá Dirección, Inquilino y Canon.');
+        return;
+      }
+
+      var lista = obtenerDatos();
+      var nueva = {
+        id: String(new Date().getTime()),
+        dir: dir,
+        inq: inq,
+        tel: document.getElementById('nuevoTel').value.trim() || '+54 9 11 0000-0000',
+        dni: document.getElementById('nuevoDni').value.trim() || 'Sin DNI',
+        canon: Number(canon),
+        ajuste: document.getElementById('nuevoAjuste').value,
+        cobrado: false,
+        alias: document.getElementById('nuevoAlias').value.trim().toUpperCase() || 'AALQUILERES.COBROS'
+      };
+
+      lista.unshift(nueva);
+      guardarDatos(lista);
+      idSeleccionado = nueva.id;
+      renderizar();
+      mostrarToast('Propiedad creada');
+      irA('panel');
+    }
+
+    function copiarAliasBancario() {
+      var lista = obtenerDatos();
+      var p = lista.find(function(x) { return x.id === idSeleccionado; }) || lista[0];
+      var alias = p ? p.alias : 'AALQUILERES.JULIAN1845';
+      if (navigator.clipboard) navigator.clipboard.writeText(alias);
+      mostrarToast('Alias copiado: ' + alias);
+    }
+
+    function guardarDeduccion() {
+      var val = Number(document.getElementById('inputDeduccion').value);
+      if (!val || val <= 0) { alert('Ingresá un monto válido'); return; }
+      document.getElementById('filaDeduccion').style.display = 'flex';
+      document.getElementById('montoDeduccion').innerText = '-$' + val.toLocaleString('es-AR') + ' ARS';
+      
+      var lista = obtenerDatos();
+      var p = lista.find(function(x) { return x.id === idSeleccionado; }) || lista[0];
+      var total = (Number(p.canon) + 68500 + 18200) - val;
+      document.getElementById('portalTotal').innerHTML = '$' + total.toLocaleString('es-AR') + ' <span class="text-xs font-normal text-slate-500">ARS</span>';
+      mostrarToast('Deducción aplicada');
+    }
+
+    function renderizar() {
+      var lista = obtenerDatos();
+      var total = 0, cobrado = 0, cobradasCount = 0;
+
+      lista.forEach(function(p) {
+        var c = Number(p.canon) || 0;
+        total += c;
+        if (p.cobrado) {
+          cobrado += c;
+          cobradasCount++;
+        }
+      });
+
+      var pendiente = total - cobrado;
+      var pendientesCount = lista.length - cobradasCount;
+
+      document.getElementById('kpiTotal').innerHTML = '$' + total.toLocaleString('es-AR') + ' <span class="text-sm font-semibold text-slate-400">ARS</span>';
+      document.getElementById('kpiCount').innerText = lista.length + ' Departamentos';
+      document.getElementById('kpiCobrado').innerHTML = '$' + cobrado.toLocaleString('es-AR') + ' <span class="text-sm font-semibold text-emerald-500">ARS</span>';
+      document.getElementById('kpiCobradoCount').innerText = cobradasCount + ' liquidadas';
+      document.getElementById('kpiPendiente').innerHTML = '$' + pendiente.toLocaleString('es-AR') + ' <span class="text-sm font-semibold text-amber-500">ARS</span>';
+      document.getElementById('kpiPendienteCount').innerText = pendientesCount + ' por conciliar';
+
+      // Departamentos en Panel
+      var contenedor = document.getElementById('contenedorPropiedades');
+      contenedor.innerHTML = '';
+      lista.forEach(function(p) {
+        var tarjeta = document.createElement('div');
+        tarjeta.className = 'bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4';
+        tarjeta.innerHTML = 
+          '<div class="flex justify-between items-start">' +
+            '<div>' +
+              '<h3 class="text-sm font-extrabold text-slate-900">' + p.dir + '</h3>' +
+              '<p class="text-xs text-slate-500 mt-0.5">Inquilino/a: <strong class="text-slate-900 font-bold">' + p.inq + '</strong></p>' +
+            '</div>' +
+            (p.cobrado 
+              ? '<span class="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">✓ Cobrado</span>'
+              : '<span class="text-[10px] font-bold bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200">⏱ Pendiente</span>') +
+          '</div>' +
+          '<div class="bg-slate-50 p-3 rounded-xl flex justify-between items-center text-xs">' +
+            '<div><span class="text-[10px] text-slate-400 block font-semibold">Canon</span><strong class="text-slate-900 font-black">$' + Number(p.canon).toLocaleString('es-AR') + '</strong></div>' +
+            '<div><span class="text-[10px] text-slate-400 block font-semibold">Ajuste</span><span class="text-slate-700 font-bold">' + p.ajuste + '</span></div>' +
+          '</div>' +
+          '<div class="flex gap-2 pt-1">' +
+            '<button type="button" onclick="abrirFicha(\'' + p.id + '\')" class="flex-1 py-2.5 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 active:scale-95 transition">Ver Ficha</button>' +
+            '<button type="button" onclick="togglePago(\'' + p.id + '\')" class="px-3.5 py-2.5 ' + (p.cobrado ? 'bg-slate-100 text-slate-700 border border-slate-200' : 'bg-emerald-600 text-white') + ' text-xs font-bold rounded-xl active:scale-95 transition">' + (p.cobrado ? '✓ Al día' : 'Cobrar') + '</button>' +
+          '</div>';
+        contenedor.appendChild(tarjeta);
+      });
+
+      // Inquilinos
+      var contInq = document.getElementById('contenedorInquilinos');
+      contInq.innerHTML = '';
+      lista.forEach(function(p) {
+        var cleanPh = (p.tel || '').replace(/[^0-9]/g, '');
+        var waUrl = 'https://wa.me/' + cleanPh + '?text=' + encodeURIComponent('¡Hola ' + p.inq + '! Te recordamos el canon en ' + p.dir + ' por $' + Number(p.canon).toLocaleString('es-AR') + ' ARS.');
+        var icard = document.createElement('div');
+        icard.className = 'bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3 text-xs';
+        icard.innerHTML = 
+          '<div class="flex justify-between items-start">' +
+            '<div><h3 class="text-sm font-extrabold text-slate-900">' + p.inq + '</h3><p class="text-xs text-slate-500">' + p.dir + '</p></div>' +
+            '<span class="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">Activo</span>' +
+          '</div>' +
+          '<p class="text-slate-600">📱 WhatsApp: <strong class="text-slate-900">' + p.tel + '</strong></p>' +
+          '<div class="grid grid-cols-2 gap-2 pt-1">' +
+            '<a href="' + waUrl + '" target="_blank" class="py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-center block">WhatsApp</a>' +
+            '<button type="button" onclick="abrirFicha(\'' + p.id + '\')" class="py-2.5 bg-slate-900 text-white font-bold rounded-xl">Editar Ficha</button>' +
+          '</div>';
+        contInq.appendChild(icard);
+      });
+
+      // Portal
+      var cur = lista.find(function(x) { return x.id === idSeleccionado; }) || lista[0];
+      if (cur) {
+        document.getElementById('portalDir').innerText = cur.dir;
+        document.getElementById('portalInquilino').innerText = cur.inq;
+        document.getElementById('portalCanon').innerText = '$' + Number(cur.canon).toLocaleString('es-AR') + ' ARS';
+        document.getElementById('portalAlias').innerText = cur.alias;
+        var totalConServicios = Number(cur.canon) + 68500 + 18200;
+        document.getElementById('portalTotal').innerHTML = '$' + totalConServicios.toLocaleString('es-AR') + ' <span class="text-xs font-normal text-slate-500">ARS</span>';
+
+        var cleanPh2 = (cur.tel || '').replace(/[^0-9]/g, '');
+        document.getElementById('btnAvisarPagoWA').href = 'https://wa.me/' + cleanPh2 + '?text=' + encodeURIComponent('¡Hola! Ya realicé la transferencia de mi alquiler en ' + cur.dir + ' por $' + totalConServicios.toLocaleString('es-AR') + ' ARS.');
+      }
+    }
+
+    // INICIO
+    renderizar();
+    irA('panel');
+  </script>
+</body>
+</html>
