@@ -59,11 +59,8 @@
   <!-- CONTENEDOR CENTRAL DE PANTALLAS -->
   <main class="max-w-5xl mx-auto w-full px-4 py-6 flex-1">
 
-    <!-- ============================================== -->
-    <!-- 1. PANTALLA: PANEL PRINCIPAL                    -->
-    <!-- ============================================== -->
+    <!-- 1. PANTALLA: PANEL PRINCIPAL -->
     <section id="vista-panel" class="vista-pantalla activa space-y-6">
-      <!-- TARJETAS DE TOTALES -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Recaudación Total</span>
@@ -84,7 +81,6 @@
         </div>
       </div>
 
-      <!-- ACCIONES RÁPIDAS -->
       <div class="grid grid-cols-2 gap-3">
         <button type="button" onclick="irA('nueva')" class="p-4 bg-slate-900 text-white text-xs font-extrabold rounded-xl shadow-sm flex items-center justify-center gap-2 hover:bg-slate-800 active:scale-95 transition">
           <span class="text-emerald-400 text-base font-black">+</span> Nueva Propiedad
@@ -94,7 +90,6 @@
         </button>
       </div>
 
-      <!-- LISTADO DE PROPIEDADES -->
       <div class="space-y-4">
         <div class="flex items-center justify-between">
           <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tus Departamentos</h2>
@@ -104,9 +99,7 @@
       </div>
     </section>
 
-    <!-- ============================================== -->
-    <!-- 2. PANTALLA: ALTA DE PROPIEDAD                 -->
-    <!-- ============================================== -->
+    <!-- 2. PANTALLA: ALTA DE PROPIEDAD -->
     <section id="vista-nueva" class="vista-pantalla max-w-2xl mx-auto space-y-6">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <button type="button" onclick="irA('panel')" class="p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs flex items-center gap-1">
@@ -160,9 +153,7 @@
       </div>
     </section>
 
-    <!-- ============================================== -->
-    <!-- 3. PANTALLA: FICHA Y EDICIÓN                    -->
-    <!-- ============================================== -->
+    <!-- 3. PANTALLA: FICHA Y EDICIÓN -->
     <section id="vista-ficha" class="vista-pantalla max-w-2xl mx-auto space-y-6">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <button type="button" onclick="irA('panel')" class="p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs flex items-center gap-1">
@@ -211,19 +202,17 @@
         </button>
 
         <a id="btnEnviarWhatsAppFicha" href="#" target="_blank" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl text-center block transition">
-          📲 Enviar Datos por WhatsApp
+          📲 Enviar Acceso y Datos por WhatsApp
         </a>
       </div>
     </section>
 
-    <!-- ============================================== -->
-    <!-- 4. PANTALLA: GESTIÓN DE INQUILINOS             -->
-    <!-- ============================================== -->
+    <!-- 4. PANTALLA: GESTIÓN DE INQUILINOS -->
     <section id="vista-inquilinos" class="vista-pantalla space-y-6">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div>
           <h2 class="text-base font-extrabold text-slate-900">Gestión de Inquilinos</h2>
-          <p class="text-xs text-slate-500">Accesos directos por WhatsApp</p>
+          <p class="text-xs text-slate-500">Invitaciones y accesos directos con enlace</p>
         </div>
         <button type="button" onclick="irA('panel')" class="p-2.5 rounded-xl bg-slate-200 text-slate-800 font-bold text-xs">
           ← Volver
@@ -232,9 +221,7 @@
       <div id="contenedorInquilinos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
-    <!-- ============================================== -->
-    <!-- 5. PANTALLA: PORTAL DEL INQUILINO              -->
-    <!-- ============================================== -->
+    <!-- 5. PANTALLA: PORTAL DEL INQUILINO -->
     <section id="vista-portal" class="vista-pantalla max-w-xl mx-auto space-y-5">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <button type="button" onclick="irA('panel')" class="p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs">
@@ -319,7 +306,7 @@
     </button>
   </nav>
 
-  <!-- MOTOR JAVASCRIPT GARANTIZADO -->
+  <!-- MOTOR JAVASCRIPT CON ENLACES COMPLETOS -->
   <script>
     var CLAVE_STORAGE = 'AALQUILERES_VFINAL_OK';
 
@@ -331,7 +318,11 @@
 
     var idSeleccionado = '1';
 
-    // NAVEGACIÓN LIMPIA
+    // Obtener la URL base pública de la app
+    function obtenerUrlApp() {
+      return window.location.origin + window.location.pathname;
+    }
+
     function irA(nombre) {
       var pantallas = document.querySelectorAll('.vista-pantalla');
       pantallas.forEach(function(p) { p.classList.remove('activa'); });
@@ -395,6 +386,16 @@
       }
     }
 
+    function copiarLinkInquilino(id) {
+      var urlPortal = obtenerUrlApp() + '?vista=portal&id=' + id;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(urlPortal);
+        mostrarToast('¡Link copiado!: ' + urlPortal);
+      } else {
+        prompt('Copiá este enlace para el inquilino:', urlPortal);
+      }
+    }
+
     function abrirFicha(id) {
       idSeleccionado = id;
       var lista = obtenerDatos();
@@ -410,7 +411,10 @@
       document.getElementById('editAlias').value = p.alias;
 
       var cleanPh = (p.tel || '').replace(/[^0-9]/g, '');
-      document.getElementById('btnEnviarWhatsAppFicha').href = 'https://wa.me/' + cleanPh + '?text=' + encodeURIComponent('¡Hola ' + p.inq + '! Te recordamos el canon en ' + p.dir + '. Canon: $' + Number(p.canon).toLocaleString('es-AR') + ' ARS. Alias: ' + p.alias);
+      var linkAcceso = obtenerUrlApp() + '?vista=portal&id=' + p.id;
+      var mensajeWA = '¡Hola ' + p.inq + '! Te comparto el acceso al portal de tu alquiler en ' + p.dir + '. Canon: $' + Number(p.canon).toLocaleString('es-AR') + ' ARS. Alias: ' + p.alias + '\n\n🔗 Entrá acá para ver tu cuenta y comprobante:\n' + linkAcceso;
+
+      document.getElementById('btnEnviarWhatsAppFicha').href = 'https://wa.me/' + cleanPh + '?text=' + encodeURIComponent(mensajeWA);
 
       irA('ficha');
     }
@@ -540,7 +544,10 @@
       contInq.innerHTML = '';
       lista.forEach(function(p) {
         var cleanPh = (p.tel || '').replace(/[^0-9]/g, '');
-        var waUrl = 'https://wa.me/' + cleanPh + '?text=' + encodeURIComponent('¡Hola ' + p.inq + '! Te recordamos el canon en ' + p.dir + ' por $' + Number(p.canon).toLocaleString('es-AR') + ' ARS.');
+        var linkPortal = obtenerUrlApp() + '?vista=portal&id=' + p.id;
+        var textoWA = '¡Hola ' + p.inq + '! Te comparto el acceso al portal de tu alquiler para ' + p.dir + '. Canon de este mes: $' + Number(p.canon).toLocaleString('es-AR') + ' ARS.\n\n🔗 Podés consultar el alias y avisar tu pago acá:\n' + linkPortal;
+        var waUrl = 'https://wa.me/' + cleanPh + '?text=' + encodeURIComponent(textoWA);
+
         var icard = document.createElement('div');
         icard.className = 'bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3 text-xs';
         icard.innerHTML = 
@@ -550,13 +557,14 @@
           '</div>' +
           '<p class="text-slate-600">📱 WhatsApp: <strong class="text-slate-900">' + p.tel + '</strong></p>' +
           '<div class="grid grid-cols-2 gap-2 pt-1">' +
-            '<a href="' + waUrl + '" target="_blank" class="py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-center block">WhatsApp</a>' +
-            '<button type="button" onclick="abrirFicha(\'' + p.id + '\')" class="py-2.5 bg-slate-900 text-white font-bold rounded-xl">Editar Ficha</button>' +
-          '</div>';
+            '<a href="' + waUrl + '" target="_blank" class="py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-center block">Enviar por WhatsApp</a>' +
+            '<button type="button" onclick="copiarLinkInquilino(\'' + p.id + '\')" class="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl">Copiar Link</button>' +
+          '</div>' +
+          '<button type="button" onclick="abrirFicha(\'' + p.id + '\')" class="w-full py-2 bg-slate-900 text-white font-bold rounded-xl text-center block">Editar Ficha</button>';
         contInq.appendChild(icard);
       });
 
-      // Portal
+      // Portal del inquilino
       var cur = lista.find(function(x) { return x.id === idSeleccionado; }) || lista[0];
       if (cur) {
         document.getElementById('portalDir').innerText = cur.dir;
@@ -571,9 +579,18 @@
       }
     }
 
-    // INICIO
+    // Comprobar parámetros de URL al ingresar (por si entra desde un enlace de inquilino)
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('id')) {
+      idSeleccionado = params.get('id');
+    }
     renderizar();
-    irA('panel');
+
+    if (params.get('vista') === 'portal') {
+      irA('portal');
+    } else {
+      irA('panel');
+    }
   </script>
 </body>
 </html>
